@@ -1,0 +1,21 @@
+package com.SRS.SRS.Service;
+
+import com.SRS.SRS.DTO.StudentDto;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+import java.util.List;
+
+public interface AdminService {
+
+    StudentDto registerStudent(StudentDto studentDto);
+    StudentDto getStudentById(Long id);
+    StudentDto getStudentByEmail(String email);
+    StudentDto getStudentByUsername(String username);
+    List<StudentDto> getAllStudents();
+    StudentDto updateStudent(Long id, StudentDto studentDto);
+    void deleteStudent(Long id);
+
+    boolean checkStudentByEmail(@Email(message = "Invalid email format") @NotBlank(message = "Email is required") String email);
+//    boolean userExist();
+}

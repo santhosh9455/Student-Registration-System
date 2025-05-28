@@ -1,6 +1,8 @@
 package com.SRS.SRS.ServiceImplementation;
 import com.SRS.SRS.DTO.StudentDto;
+import com.SRS.SRS.DTO.StudentUpdateDto;
 import com.SRS.SRS.Models.StudentEntity;
+import com.SRS.SRS.Repository.DepartmentRepo;
 import com.SRS.SRS.Repository.StudentRepo;
 import com.SRS.SRS.Service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,37 +17,59 @@ public class AdminServiceImplementation implements AdminService {
     @Autowired
     private StudentRepo studentRepo;
 
+    @Autowired
+    private DepartmentRepo departmentRepo;
+
     private StudentDto mapToDTO(StudentEntity student) {
         StudentDto dto = new StudentDto();
+        dto.setId(student.getId());
         dto.setUsername(student.getUsername());
         dto.setName(student.getName());
         dto.setAge(student.getAge());
         dto.setGender(student.getGender());
         dto.setEmail(student.getEmail());
         dto.setPhoneNumber(student.getPhoneNumber());
-        dto.setDepartment(student.getDepartment());
+
+        dto.setDepartmentid(student.getDepartmentEntity().getId());
+
         return dto;
     }
 
     private StudentEntity mapToEntity(StudentDto dto) {
         StudentEntity student = new StudentEntity();
+
+        if (dto.getId()!=null && dto.getId()>0) {
+            student.setId(studentRepo.findById(dto.getId()).get().getId());
+        }
         student.setUsername(dto.getUsername());
         student.setName(dto.getName());
         student.setAge(dto.getAge());
         student.setGender(dto.getGender());
         student.setEmail(dto.getEmail());
         student.setPhoneNumber(dto.getPhoneNumber());
-        student.setDepartment(dto.getDepartment());
+
+
+        student.setDepartmentEntity(departmentRepo.findById(dto.getDepartmentid()).get());
+
         return student;
     }
 
+
     @Override
-    public StudentDto registerStudent(StudentDto studentDto) {
-        if (studentRepo.findByEmail(studentDto.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+    public StudentDto registerStudent(StudentDto studentDto,StudentUpdateDto studentUpdateDto) {
+
+        if (studentRepo.findById(studentDto.getId()).isPresent()){
+            updateStudentPartial(studentDto.getId(),studentUpdateDto);
         }
+
+        System.out.println("log"+studentRepo.findByEmail(studentDto.getEmail()).isPresent());
+        if (studentRepo.findByEmail(studentDto.getEmail()).isPresent()) {
+            throw new RuntimeException(studentDto.getEmail()+" Email already exists");
+        }
+
         StudentEntity student = mapToEntity(studentDto);
-        return mapToDTO(studentRepo.save(student));
+        StudentEntity saved = studentRepo.save(student);
+        return mapToDTO(saved);
     }
 
     @Override
@@ -80,7 +104,6 @@ public class AdminServiceImplementation implements AdminService {
         student.setGender(dto.getGender());
         student.setEmail(dto.getEmail());
         student.setPhoneNumber(dto.getPhoneNumber());
-        student.setDepartment(dto.getDepartment());
         return mapToDTO(studentRepo.save(student));
     }
 
@@ -92,6 +115,41 @@ public class AdminServiceImplementation implements AdminService {
     @Override
     public boolean checkStudentByEmail(String email) {
         return studentRepo.existsByEmail(email);
+    }
+
+    @Override
+    public StudentEntity updateStudentPartial(Long id, StudentUpdateDto dto) {
+        StudentEntity student = studentRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + id));
+
+        // Only update non-null fields
+        if (dto.getName() != null) {
+            student.setName(dto.getName());
+        }
+
+        if (dto.getAge() != null) {
+            student.setAge(dto.getAge());
+        }
+
+        if (dto.getGender() != null) {
+            student.setGender(dto.getGender());
+        }
+
+        if (dto.getEmail() != null) {
+            student.setEmail(dto.getEmail());
+        }
+
+        if (dto.getUsername() != null) {
+            student.setUsername(dto.getUsername());
+        }
+
+        if (dto.getPhoneNumber() != null) {
+            student.setPhoneNumber(dto.getPhoneNumber());
+        }
+
+
+        // Save the updated entity
+        return studentRepo.save(student);
     }
 
 //    @Override

@@ -1,6 +1,6 @@
 package com.SRS.SRS.Controller;
 import com.SRS.SRS.DTO.StudentDto;
-import com.SRS.SRS.ExceptionsHandulars.ResourceAlreadyExistsException;
+import com.SRS.SRS.DTO.StudentUpdateDto;
 import com.SRS.SRS.ServiceImplementation.AdminServiceImplementation;
 import com.SRS.SRS.ServiceImplementation.EmailService;
 import jakarta.validation.Valid;
@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+
 
 
 @RestController
@@ -22,31 +23,28 @@ public class AdminController {
 
     // Register the student
     @PostMapping("/register-student")
-    public String registerStudent(@Valid @RequestBody StudentDto studentDto) throws ResourceAlreadyExistsException {
+    public ResponseEntity<StudentDto> registerStudent(@Valid @RequestBody StudentDto studentDto,StudentUpdateDto studentUpdateDto){
         // Get student's email from the request
         String studentEmail = studentDto.getEmail();
+        String studentName = studentDto.getName();
 
-        // Check if the student email already exists
+//        // Check if the student email already exists
         boolean userEmailExists = adminServiceImplementation.checkStudentByEmail(studentEmail);
 
-        if (userEmailExists) {
-            throw new ResourceAlreadyExistsException("Email already exists");
-        }
-
         // If not exists, save student details
-        adminServiceImplementation.registerStudent(studentDto);
+        StudentDto saved= adminServiceImplementation.registerStudent(studentDto,studentUpdateDto);
 
         // Send confirmation email to student
         try {
             emailService.sendSimpleEmail(studentEmail,"Registration Successful",
-                    "Hi " + studentDto.getName() + " " +
+                    "Hi " + studentName + " " +
                             "You have been successfully registered");
         } catch (Exception e) {
             System.err.println("Email sending failed: " + e.getMessage());
             // Optional: log the error or alert admin
         }
 
-        return "Student Registered";
+        return ResponseEntity.ok(saved);
     }
 
 
@@ -107,15 +105,12 @@ public class AdminController {
     }
 
     // Update the student by id
-    @PutMapping("/{id}")
-    public ResponseEntity<StudentDto> updateStudent(@PathVariable Long id, @Valid @RequestBody StudentDto studentDto) {
-        try {
-            return ResponseEntity.ok(adminServiceImplementation.updateStudent(id, studentDto));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
+    @PatchMapping("/update-student/{id}")
+    public String updateStudent(@PathVariable Long id, @RequestBody StudentUpdateDto studentUpdateDto) {
+        adminServiceImplementation.updateStudentPartial(id, studentUpdateDto);
+        return "Student updated";
     }
+
 
     // Delete the student by id
     @DeleteMapping("/{id}")

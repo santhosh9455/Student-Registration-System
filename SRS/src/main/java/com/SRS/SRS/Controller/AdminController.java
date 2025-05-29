@@ -1,4 +1,5 @@
 package com.SRS.SRS.Controller;
+import com.SRS.SRS.DTO.AdminDto;
 import com.SRS.SRS.DTO.StudentDto;
 import com.SRS.SRS.DTO.StudentUpdateDto;
 import com.SRS.SRS.ServiceImplementation.AdminServiceImplementation;
@@ -8,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-
-
 
 @RestController
 @RequestMapping("/admin")
@@ -21,8 +20,14 @@ public class AdminController {
     @Autowired
     private EmailService emailService;
 
+    @PostMapping("/createAdmin")
+    public AdminDto createAdmin(@RequestBody AdminDto adminDto){
+        return adminServiceImplementation.CreateAdmin(adminDto);
+
+    }
+
     // Register the student
-    @PostMapping("/register-student")
+    @PostMapping("/registerStudent")
     public ResponseEntity<StudentDto> registerStudent(@Valid @RequestBody StudentDto studentDto,StudentUpdateDto studentUpdateDto){
         // Get student's email from the request
         String studentEmail = studentDto.getEmail();
@@ -105,7 +110,7 @@ public class AdminController {
     }
 
     // Update the student by id
-    @PatchMapping("/update-student/{id}")
+    @PatchMapping("/updateStudent/{id}")
     public String updateStudent(@PathVariable Long id, @RequestBody StudentUpdateDto studentUpdateDto) {
         adminServiceImplementation.updateStudentPartial(id, studentUpdateDto);
         return "Student updated";

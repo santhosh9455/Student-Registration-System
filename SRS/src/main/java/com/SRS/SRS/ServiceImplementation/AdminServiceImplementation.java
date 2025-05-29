@@ -1,11 +1,15 @@
 package com.SRS.SRS.ServiceImplementation;
+import com.SRS.SRS.DTO.AdminDto;
 import com.SRS.SRS.DTO.StudentDto;
 import com.SRS.SRS.DTO.StudentUpdateDto;
+import com.SRS.SRS.Models.AdminEntity;
 import com.SRS.SRS.Models.StudentEntity;
+import com.SRS.SRS.Repository.AdminRepo;
 import com.SRS.SRS.Repository.DepartmentRepo;
 import com.SRS.SRS.Repository.StudentRepo;
 import com.SRS.SRS.Service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +23,36 @@ public class AdminServiceImplementation implements AdminService {
 
     @Autowired
     private DepartmentRepo departmentRepo;
+
+    @Autowired
+    private AdminRepo adminRepo;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+
+    @Override
+    public AdminDto CreateAdmin(AdminDto adminDetail) {
+        AdminEntity adminEntity = new AdminEntity();
+        adminEntity.setId(adminDetail.getId()); // optional if ID is auto-generated
+        adminEntity.setUsername(adminDetail.getUsername());
+        adminEntity.setEmail(adminDetail.getEmail());
+        adminEntity.setPassword(passwordEncoder.encode(adminDetail.getPassword()));
+
+        // Save to repository
+        AdminEntity savedEntity = adminRepo.save(adminEntity);
+
+        // Inline: Entity → DTO
+        AdminDto savedDto = new AdminDto();
+        savedDto.setId(savedEntity.getId());
+        savedDto.setUsername(savedEntity.getUsername());
+        savedDto.setEmail(savedEntity.getEmail());
+        savedDto.setPassword(savedEntity.getPassword());
+
+        return savedDto;
+    }
+
+
 
     private StudentDto mapToDTO(StudentEntity student) {
         StudentDto dto = new StudentDto();
@@ -53,6 +87,8 @@ public class AdminServiceImplementation implements AdminService {
 
         return student;
     }
+
+
 
 
     @Override

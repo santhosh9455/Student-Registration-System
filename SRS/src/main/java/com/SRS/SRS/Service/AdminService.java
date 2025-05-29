@@ -1,5 +1,6 @@
 package com.SRS.SRS.Service;
 
+import com.SRS.SRS.DTO.AdminDto;
 import com.SRS.SRS.DTO.StudentDto;
 import com.SRS.SRS.DTO.StudentUpdateDto;
 import com.SRS.SRS.Models.StudentEntity;
@@ -10,6 +11,7 @@ import java.util.List;
 
 public interface AdminService {
 
+    AdminDto CreateAdmin(AdminDto adminDetail);
     StudentDto registerStudent(StudentDto studentDto,StudentUpdateDto studentUpdateDto);
     StudentDto getStudentById(Long id);
     StudentDto getStudentByEmail(String email);

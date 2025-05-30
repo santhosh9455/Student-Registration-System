@@ -1,4 +1,5 @@
 package com.SRS.SRS.ServiceImplementation;
+
 import com.SRS.SRS.DTO.AdminDto;
 import com.SRS.SRS.DTO.StudentDto;
 import com.SRS.SRS.DTO.StudentUpdateDto;
@@ -33,6 +34,8 @@ public class AdminServiceImplementation implements AdminService {
 
     @Override
     public AdminDto CreateAdmin(AdminDto adminDetail) {
+
+        // Inline: DTO→ Entity
         AdminEntity adminEntity = new AdminEntity();
         adminEntity.setId(adminDetail.getId()); // optional if ID is auto-generated
         adminEntity.setUsername(adminDetail.getUsername());
@@ -48,10 +51,10 @@ public class AdminServiceImplementation implements AdminService {
         savedDto.setUsername(savedEntity.getUsername());
         savedDto.setEmail(savedEntity.getEmail());
         savedDto.setPassword(savedEntity.getPassword());
+        savedDto.setRole(savedEntity.getRole());
 
         return savedDto;
     }
-
 
 
     private StudentDto mapToDTO(StudentEntity student) {
@@ -63,6 +66,7 @@ public class AdminServiceImplementation implements AdminService {
         dto.setGender(student.getGender());
         dto.setEmail(student.getEmail());
         dto.setPhoneNumber(student.getPhoneNumber());
+        dto.setPassword(student.getPassword());
 
         dto.setDepartmentid(student.getDepartmentEntity().getId());
 
@@ -72,7 +76,7 @@ public class AdminServiceImplementation implements AdminService {
     private StudentEntity mapToEntity(StudentDto dto) {
         StudentEntity student = new StudentEntity();
 
-        if (dto.getId()!=null && dto.getId()>0) {
+        if (dto.getId() != null && dto.getId() > 0) {
             student.setId(studentRepo.findById(dto.getId()).get().getId());
         }
         student.setUsername(dto.getUsername());
@@ -81,6 +85,7 @@ public class AdminServiceImplementation implements AdminService {
         student.setGender(dto.getGender());
         student.setEmail(dto.getEmail());
         student.setPhoneNumber(dto.getPhoneNumber());
+        student.setPassword(passwordEncoder.encode(dto.getPassword()));
 
 
         student.setDepartmentEntity(departmentRepo.findById(dto.getDepartmentid()).get());
@@ -89,18 +94,16 @@ public class AdminServiceImplementation implements AdminService {
     }
 
 
-
-
     @Override
-    public StudentDto registerStudent(StudentDto studentDto,StudentUpdateDto studentUpdateDto) {
+    public StudentDto registerStudent(StudentDto studentDto, StudentUpdateDto studentUpdateDto) {
 
-        if (studentRepo.findById(studentDto.getId()).isPresent()){
-            updateStudentPartial(studentDto.getId(),studentUpdateDto);
+        if (studentRepo.findById(studentDto.getId()).isPresent()) {
+            updateStudentPartial(studentDto.getId(), studentUpdateDto);
         }
 
-        System.out.println("log"+studentRepo.findByEmail(studentDto.getEmail()).isPresent());
+        System.out.println("log" + studentRepo.findByEmail(studentDto.getEmail()).isPresent());
         if (studentRepo.findByEmail(studentDto.getEmail()).isPresent()) {
-            throw new RuntimeException(studentDto.getEmail()+" Email already exists");
+            throw new RuntimeException(studentDto.getEmail() + " Email already exists");
         }
 
         StudentEntity student = mapToEntity(studentDto);

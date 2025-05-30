@@ -41,26 +41,27 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/v2/api-docs", "/swagger-resources/**", "/swagger-ui/**", "/webjars/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/admin/createAdmin").permitAll()
                         .requestMatchers("/auth/login").permitAll()
-                        .requestMatchers("/admin/**").authenticated()
+                        .requestMatchers("/admin/**").hasRole("ADMIN") // Ensure this matches your endpoint
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
-//                .formLogin(form -> form.disable()); // ✅ disable form login
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+//                .formLogin(form -> form.disable()); // disable form login
 
         return http.build();
     }
 
 
-
     @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider(){
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
 
-        DaoAuthenticationProvider daoAuthenticate= new DaoAuthenticationProvider();
+        DaoAuthenticationProvider daoAuthenticate = new DaoAuthenticationProvider();
         daoAuthenticate.setUserDetailsService(userDetailsService);
         daoAuthenticate.setPasswordEncoder(passwordEncoder());
 
@@ -68,7 +69,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(){
+    public AuthenticationManager authenticationManager() {
         return new ProviderManager(List.of(daoAuthenticationProvider()));
     }
 }

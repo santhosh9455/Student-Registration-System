@@ -1,6 +1,5 @@
 package com.SRS.SRS.ServiceImplementation;
 
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -27,7 +26,6 @@ public class EmailService {
             e.printStackTrace();
         }
     }
-
 
 
 }

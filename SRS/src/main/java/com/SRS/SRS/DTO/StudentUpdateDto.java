@@ -18,6 +18,7 @@ public class StudentUpdateDto {
     private String email;
     private String username;
     private String phoneNumber;
+    private String password;
     private String department;
 
 }

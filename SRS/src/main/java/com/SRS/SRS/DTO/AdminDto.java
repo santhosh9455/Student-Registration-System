@@ -17,8 +17,9 @@ public class AdminDto {
 
     @NotNull(message = "username required")
     private String username;
-    @Email(message = "Invalide email type")
+    @Email(message = "Invalid email type")
     @NotNull(message = "Email is Required")
     private String email;
     private String password;
+    private String role;
 }

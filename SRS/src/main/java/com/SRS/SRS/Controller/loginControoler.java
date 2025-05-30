@@ -32,6 +32,8 @@ public class loginControoler {
     private JwtUtil jwtUtil;
 
     @PostMapping("/login")
+
+    //login request either Username or Email with password
     public ResponseEntity<Map<String, String>> login(@RequestBody AdminDto loginRequest) {
 
         try {

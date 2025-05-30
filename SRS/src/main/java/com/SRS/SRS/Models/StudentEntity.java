@@ -6,8 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.Optional;
-
 
 @Data
 @AllArgsConstructor
@@ -30,6 +28,8 @@ public class StudentEntity {
     private String email;
 
     private String phoneNumber;
+
+    private String password;
 
     @ManyToOne
     private DepartmentEntity departmentEntity;

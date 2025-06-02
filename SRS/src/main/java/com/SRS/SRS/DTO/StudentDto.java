@@ -34,6 +34,9 @@ public class StudentDto {
     @Pattern(regexp = "^[6-9]\\d{9}$", message = "Invalid phone number")
     private String phoneNumber;
 
+    @NotBlank(message = "password is required")
+    private String password;
+
     @NotNull(message = "not null")
     private Long departmentid;
 

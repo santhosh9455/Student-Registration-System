@@ -12,12 +12,19 @@ import java.util.List;
 public interface AdminService {
 
     AdminDto CreateAdmin(AdminDto adminDetail);
-    StudentDto registerStudent(StudentDto studentDto,StudentUpdateDto studentUpdateDto);
+
+    StudentDto registerStudent(StudentDto studentDto, StudentUpdateDto studentUpdateDto);
+
     StudentDto getStudentById(Long id);
+
     StudentDto getStudentByEmail(String email);
+
     StudentDto getStudentByUsername(String username);
+
     List<StudentDto> getAllStudents();
+
     StudentDto updateStudent(Long id, StudentDto studentDto);
+
     void deleteStudent(Long id);
 
     boolean checkStudentByEmail(@Email(message = "Invalid email format") @NotBlank(message = "Email is required") String email);

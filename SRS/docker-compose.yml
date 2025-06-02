@@ -1,0 +1,29 @@
+#version: '3.8'
+#
+#services:
+#  db:
+#    image: mysql:8
+#    container_name: srs-mysql
+#    environment:
+#      MYSQL_DATABASE: srs
+#      MYSQL_ROOT_PASSWORD: skpc
+#    ports:
+#      - "3307:3306"
+#    volumes:
+#      - srs-data:/var/lib/mysql
+#
+#  app:
+#    build: .
+#    container_name: srs-app
+#    depends_on:
+#      - db
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/srs
+#      SPRING_DATASOURCE_USERNAME: root
+#      SPRING_DATASOURCE_PASSWORD: skpc
+#    restart: on-failure
+#
+#volumes:
+#  srs-data:

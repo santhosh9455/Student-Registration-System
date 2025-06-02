@@ -41,26 +41,32 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/admin/createAdmin").permitAll()
                         .requestMatchers("/auth/login").permitAll()
-                        .requestMatchers("/admin/**").authenticated()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
-//                .formLogin(form -> form.disable()); // ✅ disable form login
+
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
 
-
     @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider(){
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
 
-        DaoAuthenticationProvider daoAuthenticate= new DaoAuthenticationProvider();
+        DaoAuthenticationProvider daoAuthenticate = new DaoAuthenticationProvider();
         daoAuthenticate.setUserDetailsService(userDetailsService);
         daoAuthenticate.setPasswordEncoder(passwordEncoder());
 
@@ -68,7 +74,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(){
+    public AuthenticationManager authenticationManager() {
         return new ProviderManager(List.of(daoAuthenticationProvider()));
     }
 }

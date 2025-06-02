@@ -1,4 +1,5 @@
 package com.SRS.SRS.Controller;
+
 import com.SRS.SRS.DTO.AdminDto;
 import com.SRS.SRS.DTO.StudentDto;
 import com.SRS.SRS.DTO.StudentUpdateDto;
@@ -8,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -21,14 +23,14 @@ public class AdminController {
     private EmailService emailService;
 
     @PostMapping("/createAdmin")
-    public AdminDto createAdmin(@RequestBody AdminDto adminDto){
+    public AdminDto createAdmin(@RequestBody AdminDto adminDto) {
         return adminServiceImplementation.CreateAdmin(adminDto);
 
     }
 
     // Register the student
     @PostMapping("/registerStudent")
-    public ResponseEntity<StudentDto> registerStudent(@Valid @RequestBody StudentDto studentDto,StudentUpdateDto studentUpdateDto){
+    public ResponseEntity<StudentDto> registerStudent(@Valid @RequestBody StudentDto studentDto, StudentUpdateDto studentUpdateDto) {
         // Get student's email from the request
         String studentEmail = studentDto.getEmail();
         String studentName = studentDto.getName();
@@ -37,11 +39,11 @@ public class AdminController {
         boolean userEmailExists = adminServiceImplementation.checkStudentByEmail(studentEmail);
 
         // If not exists, save student details
-        StudentDto saved= adminServiceImplementation.registerStudent(studentDto,studentUpdateDto);
+        StudentDto saved = adminServiceImplementation.registerStudent(studentDto, studentUpdateDto);
 
         // Send confirmation email to student
         try {
-            emailService.sendSimpleEmail(studentEmail,"Registration Successful",
+            emailService.sendSimpleEmail(studentEmail, "Registration Successful",
                     "Hi " + studentName + " " +
                             "You have been successfully registered");
         } catch (Exception e) {
@@ -56,7 +58,7 @@ public class AdminController {
     // get the student details by id
     @GetMapping("/{id}")
     public ResponseEntity<StudentDto> getStudentById(@PathVariable Long id) {
-        try{
+        try {
             return ResponseEntity.ok(adminServiceImplementation.getStudentById(id));
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -72,7 +74,7 @@ public class AdminController {
     // get the student details by username
     @GetMapping("/username/{username}")
     public ResponseEntity<StudentDto> getStudentByUsername(@PathVariable String username) {
-        try{
+        try {
             return ResponseEntity.ok(adminServiceImplementation.getStudentByUsername(username));
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -81,7 +83,7 @@ public class AdminController {
     }
 
     // get all student details
-    @GetMapping
+    @GetMapping("/getAllStudent")
     public ResponseEntity<List<StudentDto>> getAllStudents() {
         try {
             return ResponseEntity.ok(adminServiceImplementation.getAllStudents());

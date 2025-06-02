@@ -15,15 +15,15 @@ public class DepartmentSerivecImp implements DepartmentSerivec {
     @Autowired
     private DepartmentRepo departmentRepo;
 
-    private DepartmentDto mapToDTO(DepartmentEntity deptEntit){
-        DepartmentDto dto =new DepartmentDto();
+    private DepartmentDto mapToDTO(DepartmentEntity deptEntit) {
+        DepartmentDto dto = new DepartmentDto();
         dto.setId(deptEntit.getId());
         dto.setName(deptEntit.getName());
         return dto;
     }
 
-    private DepartmentEntity mapToEntity(DepartmentDto dto){
-        DepartmentEntity dept=new DepartmentEntity();
+    private DepartmentEntity mapToEntity(DepartmentDto dto) {
+        DepartmentEntity dept = new DepartmentEntity();
         dept.setId(dto.getId());
         dept.setName(dto.getName());
         return dept;
@@ -31,8 +31,8 @@ public class DepartmentSerivecImp implements DepartmentSerivec {
 
     @Override
     public DepartmentDto saveDepartment(DepartmentDto departmentDto) {
-        DepartmentEntity deptDto= mapToEntity(departmentDto);
-        DepartmentEntity save= departmentRepo.save(deptDto);
+        DepartmentEntity deptDto = mapToEntity(departmentDto);
+        DepartmentEntity save = departmentRepo.save(deptDto);
         return mapToDTO(save);
     }
 

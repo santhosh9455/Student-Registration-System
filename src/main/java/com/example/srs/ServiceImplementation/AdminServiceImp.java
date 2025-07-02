@@ -589,7 +589,7 @@ public class AdminServiceImp implements AdminService {
         // Validate and update department
         if (dto.getDepartmentId() != null) {
             DepartmentEntity department = deptRepo.findById(dto.getDepartmentId())
-                    .orElseThrow(() -> new RuntimeException("Department not found"));
+                    .orElseThrow(() -> new RuntimeException("Department not found..."));
             profile.setDepartment(department);
         }
 

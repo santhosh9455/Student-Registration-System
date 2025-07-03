@@ -1,7 +1,6 @@
 package com.example.srs.ServiceImplementation;
 
 import com.example.srs.DTO.*;
-import com.example.srs.Enum.CourseRequestStatusEnum;
 import com.example.srs.Enum.StatusEnum;
 import com.example.srs.Model.*;
 import com.example.srs.Repository.*;
@@ -21,10 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -681,9 +677,19 @@ public class HodServiceImp implements HodService {
 
 
     @Override
-    public String deleteCourse(Long id) {
+    public Map<String, String> deleteCourse(Long id) {
+        CourseEntity core = courseRepo.findById(id)
+                        .orElseThrow(()->new RuntimeException("ID not found"));
+        if (core != null){
+            core.setStaff(null);
+            core.setStudents(null);
+        }else {
+            throw new RuntimeException("Course data is null");
+        }
+        Map<String,String> response = new HashMap<>();
+        response.put("message","Course delete successfully");
         courseRepo.deleteById(id);
-        return "Course delete successfully";
+        return response;
 
     }
 
@@ -794,6 +800,49 @@ public class HodServiceImp implements HodService {
         );
 
         return studentPage.map(this::mapToDto);
+    }
+
+    @Override
+    public Page<CourseResDto> filteredCourse(String search, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("courseName").ascending());
+
+        Page<CourseEntity> courseEntities = courseRepo.findByCourseNameContainingIgnoreCase(search, pageable);
+
+        return courseEntities.map(this::mapToDto); // map each CourseEntity to CourseResDto
+    }
+
+    @Override
+    public CourseResDto updateCourse(CourseResDto dto) {
+        CourseEntity core = courseRepo.findById(dto.getId())
+                .orElseThrow(()->new RuntimeException("Course not found with ID of "+dto.getId()));
+        if (dto.getCourseName() != null){
+            CourseEntity existCore = courseRepo.findByCourseName(dto.getCourseName());
+            if (existCore != null){
+                throw new RuntimeException(dto.getCourseName() +" already here");
+            }else {
+                core.setCourseName(dto.getCourseName());
+            }
+        }
+        if (dto.getStaffName() != null){
+            UserProfileEntity staff = profileRepo.findByName(dto.getStaffName());
+            if (staff != null){
+                boolean existCore = profileRepo.existsByCourse(staff.getCourse());
+                if (existCore){
+                    throw new RuntimeException("Staff already has Course");
+                }else {
+                    core.setStaff(staff);
+                }
+            }else {
+                throw new RuntimeException(dto.getStaffName() + " Staff not found");
+            }
+        }
+        CourseEntity saved = courseRepo.save(core);
+
+        CourseResDto res = new CourseResDto();
+        res.setId(saved.getId());
+        res.setCourseName(saved.getCourseName());
+        res.setStaffName(saved.getStaff().getName());
+        return res;
     }
 
     private String getFileExtension(String filename) {

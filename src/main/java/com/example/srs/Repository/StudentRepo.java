@@ -22,6 +22,8 @@ public interface StudentRepo extends JpaRepository<StudentEntity, Long> {
 
     List<StudentEntity> findByCourse(CourseEntity course);
 
+    Page<StudentEntity> findByCourse_Id(Long courseId, Pageable pageable);
+
     List<StudentEntity> findByCourseAndStatus(CourseEntity course, CourseRequestStatusEnum statusEnum);
 
     List<StudentEntity> findByCourseAndCourseStatus(CourseEntity course, CourseRequestStatusEnum statusEnum);
@@ -68,4 +70,10 @@ public interface StudentRepo extends JpaRepository<StudentEntity, Long> {
     );
 
     boolean existsByEmail(String email);
+
+    Page<StudentEntity> findByCourseAndNameContainingIgnoreCase(CourseEntity course, String trim, Pageable pageable);
+
+    Page<StudentEntity> findByCourse_IdAndNameContainingIgnoreCase(Long id, String trim, Pageable pageable);
+
+    Page<StudentEntity> findByCourseAndFilters(Long id, String name, String email, CourseRequestStatusEnum statusEnum, Pageable pageable);
 }

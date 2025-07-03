@@ -1,6 +1,7 @@
 package com.example.srs.Repository;
 
 import com.example.srs.Enum.StatusEnum;
+import com.example.srs.Model.CourseEntity;
 import com.example.srs.Model.StudentEntity;
 import com.example.srs.Model.UserProfileEntity;
 import com.example.srs.Model.UsersEntity;
@@ -49,4 +50,8 @@ public interface UserProfileRepo extends JpaRepository<UserProfileEntity, Long> 
     Optional<UserProfileEntity> findBySubjectIdAndIdNot(Long subjectId, Long id);
 
     Optional<UserProfileEntity> findByCourseIdAndIdNot(Long courseId, Long id);
+
+    UserProfileEntity findByName(String staffName);
+
+    boolean existsByCourse(CourseEntity course);
 }

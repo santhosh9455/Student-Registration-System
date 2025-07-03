@@ -6,12 +6,15 @@ import com.example.srs.DTO.StudentRequestDto;
 import com.example.srs.DTO.StudentResDto;
 import com.example.srs.ServiceImplementation.StudentServiceImp;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/students")
@@ -75,4 +78,22 @@ public class StudentController {
         List<CourseResDto> core = serviceImp.courseList();
         return ResponseEntity.ok(core);
     }
+
+    @GetMapping("/filteredCourses")
+    public ResponseEntity<Map<String, Object>> getFilteredCourses(
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+
+        Page<CourseResDto> coursePage = serviceImp.getFilteredCourses(search, page, size);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("courses", coursePage.getContent());
+        response.put("currentPage", coursePage.getNumber());
+        response.put("totalItems", coursePage.getTotalElements());
+        response.put("totalPages", coursePage.getTotalPages());
+
+        return ResponseEntity.ok(response);
+    }
+
 }

@@ -10,6 +10,9 @@ import com.example.srs.Model.*;
 import com.example.srs.Repository.*;
 import com.example.srs.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -174,6 +177,9 @@ public class StudentServiceImp implements StudentService {
             dto.setSubjectName("Not Registered");
         }
 
+        dto.setProfileImagePath(student.getProfileImagePath());
+        dto.setMarksheetImagePath(student.getMarksheetImagePath());
+        dto.setUsername(student.getUser().getUsername());
         return dto;
     }
 
@@ -304,7 +310,21 @@ public class StudentServiceImp implements StudentService {
                 .collect(Collectors.toList());
     }
 
-    private CourseResDto mapToDto(CourseEntity course){
+    @Override
+    public Page<CourseResDto> getFilteredCourses(String search, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<CourseEntity> coursePage;
+
+        if (search == null || search.isBlank()) {
+            coursePage = corerepo.findAll(pageable);
+        } else {
+            coursePage = corerepo.findByCourseNameContainingIgnoreCase(search, pageable);
+        }
+
+        return coursePage.map(this::mapToDto);
+    }
+
+    private CourseResDto mapToDto(CourseEntity course) {
         CourseResDto core = new CourseResDto();
         core.setId(course.getId());
         core.setCourseName(course.getCourseName());
@@ -318,6 +338,7 @@ public class StudentServiceImp implements StudentService {
 
         return core;
     }
+
 
     private StudentResDto mapToStudentDto(StudentEntity student) {
         StudentResDto dto = new StudentResDto();

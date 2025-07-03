@@ -12,6 +12,9 @@ import com.example.srs.Repository.UserProfileRepo;
 import com.example.srs.Repository.UsersRepo;
 import com.example.srs.Service.StaffService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -209,9 +212,6 @@ public class StaffServiceImp implements StaffService {
             throw new RuntimeException("User not found for username: " + username);
         }
 
-        if (user.getRole() == null || !user.getRole().getName().equalsIgnoreCase("ROLE_STAFF")) {
-            throw new RuntimeException("Only STAFF users can view their students.");
-        }
 
         // 3. Get staff profile
         UserProfileEntity profile = user.getProfile();
@@ -385,7 +385,38 @@ public class StaffServiceImp implements StaffService {
                 .collect(Collectors.toList());
     }
 
-private StudentResDto mapToDto(StudentEntity entity) {
+    @Override
+    public Page<GetCourseRequestDto> getCourseFilerStud(String name, String email, String courseStatus, int page, int size) {
+        // Get current authenticated user
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UsersEntity user = usersRepo.findByUsername(username);
+        if (user == null || user.getProfile() == null) {
+            throw new RuntimeException("Staff profile not found");
+        }
+
+        CourseEntity course = user.getProfile().getCourse();
+        if (course == null) {
+            throw new RuntimeException("Course not assigned to staff");
+        }
+
+        // Handle course status enum conversion
+        CourseRequestStatusEnum statusEnum = null;
+        if (!courseStatus.isBlank()) {
+            try {
+                statusEnum = CourseRequestStatusEnum.valueOf(courseStatus.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Invalid course status: " + courseStatus);
+            }
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<StudentEntity> students = studentRepo.findByCourseAndFilters(course.getId(), name, email, statusEnum, pageable);
+
+        return students.map(this::mapToGetCourseRequestDto);
+    }
+
+
+    private StudentResDto mapToDto(StudentEntity entity) {
     StudentResDto dto = new StudentResDto();
 
     dto.setId(entity.getId());

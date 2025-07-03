@@ -53,7 +53,7 @@ public class HodController {
             @RequestParam(defaultValue = "") String name,
             @RequestParam(defaultValue = "") String status,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "0") int size) {
 
         StatusEnum statusEnum = null;
         if (status != null && !status.isBlank()) {
@@ -151,13 +151,34 @@ public class HodController {
         return ResponseEntity.ok(serviceImp.createCourse(courseName));
     }
 
+    @PatchMapping("/updateCourse")
+    public ResponseEntity<CourseResDto> updateCourse(@RequestBody CourseResDto dto){
+        return ResponseEntity.ok(serviceImp.updateCourse(dto));
+    }
+
     @GetMapping("/getAllCourse")
     public ResponseEntity<List<CourseResDto>> getAllCourse() {
         return ResponseEntity.ok(serviceImp.getAllCourse());
     }
 
+    @GetMapping("/filteredCourse")
+    public ResponseEntity<Map<String, Object>> getAllCourse(
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Page<CourseResDto> coursePage = serviceImp.filteredCourse(search, page, size);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("courses", coursePage.getContent());
+        response.put("currentPage", coursePage.getNumber());
+        response.put("totalItems", coursePage.getTotalElements());
+        response.put("totalPages", coursePage.getTotalPages());
+
+        return ResponseEntity.ok(response);
+    }
     @DeleteMapping("/deleteCourse/{id}")
-    public ResponseEntity<String> deleteCourse(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deleteCourse(@PathVariable Long id) {
         return ResponseEntity.ok(serviceImp.deleteCourse(id));
     }
 

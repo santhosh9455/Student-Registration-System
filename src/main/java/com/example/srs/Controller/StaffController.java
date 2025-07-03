@@ -5,9 +5,11 @@ import com.example.srs.DTO.StaffResDto;
 import com.example.srs.DTO.StudentResDto;
 import com.example.srs.ServiceImplementation.StaffServiceImp;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +44,26 @@ public class StaffController {
         List<GetCourseRequestDto> core = serviceImp.getAlltudent();
         return ResponseEntity.ok(core);
     }
+
+    @GetMapping("/getCourseFilerStud")
+    public ResponseEntity<Map<String, Object>> getCourseFilerStud(
+            @RequestParam(defaultValue = "") String name,
+            @RequestParam(defaultValue = "") String email,
+            @RequestParam(defaultValue = "") String courseStatus,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Page<GetCourseRequestDto> studentPage = serviceImp.getCourseFilerStud(name, email, courseStatus, page, size);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("students", studentPage.getContent());
+        response.put("currentPage", studentPage.getNumber());
+        response.put("totalPages", studentPage.getTotalPages());
+        response.put("totalItems", studentPage.getTotalElements());
+
+        return ResponseEntity.ok(response);
+    }
+
 
     @GetMapping("/getStaff")
     public ResponseEntity<StaffResDto> getStaff() {

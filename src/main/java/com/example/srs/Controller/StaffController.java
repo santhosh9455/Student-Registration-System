@@ -46,14 +46,13 @@ public class StaffController {
     }
 
     @GetMapping("/getCourseFilerStud")
-    public ResponseEntity<Map<String, Object>> getCourseFilerStud(
+    public ResponseEntity<Map<String, Object>> getAllStudentsWithFilters(
             @RequestParam(defaultValue = "") String name,
-            @RequestParam(defaultValue = "") String email,
             @RequestParam(defaultValue = "") String courseStatus,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        Page<GetCourseRequestDto> studentPage = serviceImp.getCourseFilerStud(name, email, courseStatus, page, size);
+        Page<GetCourseRequestDto> studentPage = serviceImp.getCourseFilerStud(name, courseStatus, page, size);
 
         Map<String, Object> response = new HashMap<>();
         response.put("students", studentPage.getContent());
@@ -84,6 +83,23 @@ public class StaffController {
     @GetMapping("/getSubjectStudents")
     public ResponseEntity<List<StudentResDto>> getSubjectStudents() {
         return ResponseEntity.ok(serviceImp.getSubjectStudents());
+    }
+
+    @GetMapping("/getFilterSubjectStudents")
+    public ResponseEntity<Map<String, Object>> getFilterSubjectStudents(
+            @RequestParam(defaultValue = "") String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Page<StudentResDto> result = serviceImp.getFilterSubjectStudents(name, page, size);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("students", result.getContent());
+        response.put("currentPage", result.getNumber());
+        response.put("totalItems", result.getTotalElements());
+        response.put("totalPages", result.getTotalPages());
+
+        return ResponseEntity.ok(response);
     }
 
 }

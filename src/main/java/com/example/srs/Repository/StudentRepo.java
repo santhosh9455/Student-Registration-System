@@ -75,5 +75,21 @@ public interface StudentRepo extends JpaRepository<StudentEntity, Long> {
 
     Page<StudentEntity> findByCourse_IdAndNameContainingIgnoreCase(Long id, String trim, Pageable pageable);
 
-    Page<StudentEntity> findByCourseAndFilters(Long id, String name, String email, CourseRequestStatusEnum statusEnum, Pageable pageable);
+    @Query("SELECT s FROM StudentEntity s WHERE s.course.id = :courseId " +
+            "AND (:name IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+            "AND (:status IS NULL OR s.courseStatus = :status)")
+    Page<StudentEntity> findByCourseAndFilters(
+            @Param("courseId") Long courseId,
+            @Param("name") String name,
+            @Param("status") CourseRequestStatusEnum status,
+            Pageable pageable);
+
+
+    @Query("SELECT s FROM StudentEntity s WHERE s.subject = :subject " +
+            "AND (:name IS NULL OR LOWER(s.name) LIKE LOWER(CONCAT('%', :name, '%')))")
+    Page<StudentEntity> findBySubjectWithNameFilter(
+            @Param("subject") SubjectEntity subject,
+            @Param("name") String name,
+            Pageable pageable);
+
 }

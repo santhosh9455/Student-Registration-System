@@ -57,4 +57,6 @@ public interface AdminService {
     Page<UsersResDto> getFilteredUser(String search, Long roleId, Pageable pageable);
 
     StudentResDto RegisterRequest(StudentRequestDto dto, MultipartFile profileImage, MultipartFile marksheetImage);
+
+    List<SubjectResDto> getFilterAllSubjects(String search);
 }

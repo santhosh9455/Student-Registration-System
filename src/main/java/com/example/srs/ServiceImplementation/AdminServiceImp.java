@@ -706,6 +706,23 @@ public class AdminServiceImp implements AdminService {
         return mapToDto(savedStudent);
     }
 
+    @Override
+    public List<SubjectResDto> getFilterAllSubjects(String search) {
+        List<SubjectEntity> subjects;
+
+        if (search == null || search.trim().isEmpty()) {
+            subjects = subjectRepo.findAll();
+        } else {
+            subjects = subjectRepo.findBySubjectNameContainingIgnoreCase(search.trim());
+        }
+
+        if (subjects.isEmpty()) throw new RuntimeException("Subjects Not Found");
+
+        return subjects.stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
     private UsersResDto toResDto(UsersEntity user) {
         UsersResDto dto = new UsersResDto();
         dto.setId(user.getId());

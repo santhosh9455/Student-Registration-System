@@ -33,12 +33,11 @@ public class AdminController {
     public CustomPageResponse<UsersResDto> getUsers(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Long roleId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            Pageable pageable // supports page, size, and sort
     ) {
-        Pageable pageable = PageRequest.of(page, size);
         return new CustomPageResponse<>(adminservice.getFilteredUser(search, roleId, pageable));
     }
+
 
     @PostMapping("/createUsers")
     public ResponseEntity<UsersResDto> createUsers(@Valid @RequestBody UsersDto dto) {
@@ -88,14 +87,14 @@ public class AdminController {
             @RequestParam(required = false) String phoneNumber,
             @RequestParam(required = false) Long courseId,
             @RequestParam(required = false) Long subjectId,
-            @RequestParam(required = false) String active,
+            @RequestParam(required = false) String status,
             @RequestParam(required = false) String courseStatus,
             @RequestParam(required = false) Long departmentId,
             @RequestParam(required = false) String username,
             @RequestParam(required = false) MultipartFile profileImage,
             @RequestParam(required = false) MultipartFile marksheetImage) {
 
-        System.out.println("Status code  ..... "+active);
+        System.out.println("Status code  ..... "+status);
         StudentUpdateRequestDto dto = new StudentUpdateRequestDto();
         dto.setName(name);
         dto.setAge(age);
@@ -104,7 +103,7 @@ public class AdminController {
         dto.setPhoneNumber(phoneNumber);
         dto.setDepartmentId(departmentId);
         dto.setUsername(username);
-        dto.setStatus(active);
+        dto.setStatus(status);
         dto.setCourseId(courseId);
         dto.setCourseStatus(courseStatus);
         dto.setSubjectId(subjectId);
@@ -122,9 +121,18 @@ public class AdminController {
     public ResponseEntity<List<StudentResDto>> getStud(){
         return ResponseEntity.ok(adminservice.getAllStudent());
     }
+
     @GetMapping("/getAllSubjects")
     public ResponseEntity<List<SubjectResDto>> getAllSubject(){
         return ResponseEntity.ok(adminservice.getAllSubjects());
+    }
+
+    @GetMapping("/getFilterAllSubjects")
+    public ResponseEntity<List<SubjectResDto>> getAllSubjects(
+            @RequestParam(required = false, defaultValue = "") String search
+    ) {
+        List<SubjectResDto> result = adminservice.getFilterAllSubjects(search);
+        return ResponseEntity.ok(result);
     }
 
     @PatchMapping("/UpdateSubject")

@@ -12,6 +12,6 @@ import lombok.ToString;
 public class CourseResDto {
 
     private Long id;
-    private String CourseName;
+    private String courseName;
     private String staffName;
 }

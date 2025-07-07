@@ -183,17 +183,17 @@ public class HodController {
     }
 
     @DeleteMapping("/deleteStaff/{id}")
-    public ResponseEntity<String> deleteStaff(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deleteStaff(@PathVariable Long id) {
         return ResponseEntity.ok(serviceImp.deleteStaff(id));
     }
 
     @DeleteMapping("/deleteSubject/{id}")
-    public ResponseEntity<String> deleteSubject(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deleteSubject(@PathVariable Long id) {
         return ResponseEntity.ok(serviceImp.deleteSubject(id));
     }
 
     @DeleteMapping("deleteStudent/{id}")
-    public ResponseEntity<String> delete(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id) {
         return ResponseEntity.ok(serviceImp.deleteByid(id));
     }
 }

@@ -28,5 +28,8 @@ public interface StaffService {
     List<StudentResDto> getSubjectStudents();
 
 
-    Page<GetCourseRequestDto> getCourseFilerStud(String name, String email, String courseStatus, int page, int size);
+    Page<GetCourseRequestDto> getCourseFilerStud(String name, String courseStatus, int page, int size);
+
+
+    Page<StudentResDto> getFilterSubjectStudents(String name, int page, int size);
 }

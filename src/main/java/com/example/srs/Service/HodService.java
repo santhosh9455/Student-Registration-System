@@ -21,7 +21,7 @@ public interface HodService {
 
     StudentResDto getStudent(Long id);
 
-    String deleteByid(Long id);
+    Map<String, String> deleteByid(Long id);
 
     StaffResDto createStaff(StaffDto dto);
 
@@ -35,9 +35,9 @@ public interface HodService {
 
     StaffResDto updateStaff(Long id, StaffResDto dto);
 
-    String deleteStaff(Long id);
+    Map<String, String> deleteStaff(Long id);
 
-    String deleteSubject(Long id);
+    Map<String, String> deleteSubject(Long id);
 
     List<StaffResDto> getAllStaff();
 

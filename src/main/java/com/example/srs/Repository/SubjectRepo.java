@@ -13,4 +13,6 @@ public interface SubjectRepo extends JpaRepository<SubjectEntity, Long> {
     SubjectEntity findBySubjectNameAndDepartment_DepartmentName(String upperCase, String departmentName);
 
     List<SubjectEntity> findByDepartment_DepartmentName(String departmentName);
+
+    List<SubjectEntity> findBySubjectNameContainingIgnoreCase(String trim);
 }

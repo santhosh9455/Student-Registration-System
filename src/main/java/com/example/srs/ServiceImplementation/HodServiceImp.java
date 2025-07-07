@@ -87,7 +87,10 @@ public class HodServiceImp implements HodService {
         emailService.sendSimpleEmail(
                 saved.getEmail(),
                 "Your registration request has been approved",
-                saved.getName() + ", your registration request has been approved by HOD.\nWelcome to the department!"
+                saved.getName() + ", your registration request has been approved by HOD.\nWelcome to the department! \n" +
+                        "Other details will be in our website once you got the Authentication details you can see that" +
+                        "\n Best regards," +
+                        "\n Head of the department"
         );
 
         return mapToDto(saved);
@@ -104,6 +107,12 @@ public class HodServiceImp implements HodService {
         dto.setStatus(entity.getStatus() != null ? entity.getStatus().toString() : "PENDING");
         dto.setDepartmentName(entity.getDepartment().getDepartmentName());
 
+        // Safely check if user is not null before accessing username
+        if (entity.getUser() != null && entity.getUser().getUsername() != null) {
+            dto.setUsername(entity.getUser().getUsername());
+        } else {
+            dto.setUsername("Not Found");
+        }
         // Safely handle null course
         dto.setCourseName(
                 entity.getCourse() != null ? entity.getCourse().getCourseName() : "Not Assigned"
@@ -271,7 +280,7 @@ public class HodServiceImp implements HodService {
     }
 
     @Override
-    public String deleteByid(Long id) {
+    public Map<String, String> deleteByid(Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         UsersEntity user = usersRepo.findByUsername(username);
@@ -295,8 +304,14 @@ public class HodServiceImp implements HodService {
         }
 
         String name = student.getName();
+            student.setUser(null);
+            student.setSubject(null);
+            student.setCourse(null);
+            student.setDepartment(null);
         studentRepo.deleteById(id);
-        return "Student " + name + " deleted successfully";
+        Map<String,String> res = new HashMap<>();
+        res.put("message","Student " + name + " deleted successfully");
+        return res;
     }
 
 
@@ -317,8 +332,12 @@ public class HodServiceImp implements HodService {
         }
 
         // 3. Validate subject
-        SubjectEntity subject = subRepo.findById(dto.getSubjectId())
-                .orElseThrow(() -> new RuntimeException("The given Subject does not exist."));
+        SubjectEntity subject = null;
+        if (dto.getSubjectId() != null){
+             subject = subRepo.findById(dto.getSubjectId())
+                    .orElseThrow(() -> new RuntimeException("The given Subject does not exist."));
+        }
+
 
         // 4. Create and populate UserProfileEntity
         UserProfileEntity staffProfile = new UserProfileEntity();
@@ -354,6 +373,10 @@ public class HodServiceImp implements HodService {
         dto.setGender(staff.getGender());
         dto.setPhoneNumber(staff.getPhoneNumber());
 
+        if(staff.getUser() != null){
+            dto.setUsername(staff.getUser().getUsername());
+        }else
+            dto.setUsername("Not Assigned");
         if (staff.getDepartment() != null)
             dto.setDepartmentName(staff.getDepartment().getDepartmentName());
 
@@ -596,16 +619,34 @@ public class HodServiceImp implements HodService {
     }
 
     @Override
-    public String deleteStaff(Long id) {
+    public Map<String, String> deleteStaff(Long id) {
+        UserProfileEntity Staff =profileRepo.findById(id)
+                        .orElseThrow(()-> new RuntimeException("Staff not Found"));
+        if(Staff != null){
+            Staff.setUser(null);
+            Staff.setCourse(null);
+            Staff.setDepartment(null);
+            Staff.setSubject(null);
+        }
         profileRepo.deleteById(id);
-        return "Staff Deleted successfully";
+        Map<String,String> response = new HashMap<>();
+        response.put("message","Staff Deleted successfully");
+        return response;
 
     }
 
     @Override
-    public String deleteSubject(Long id) {
+    public Map<String, String> deleteSubject(Long id) {
+        SubjectEntity sub = subRepo.findById(id)
+                        .orElseThrow(()->new RuntimeException("Subject not found with give ID"));
+        if(sub != null){
+            sub.setDepartment(null);
+            sub.setStaffProfiles(null);
+        }
         subRepo.deleteById(id);
-        return "Subject Deleted successfully";
+        Map<String,String> response = new HashMap<>();
+        response.put("message","Subject Deleted successfully");
+        return response;
 
     }
 
@@ -813,35 +854,49 @@ public class HodServiceImp implements HodService {
 
     @Override
     public CourseResDto updateCourse(CourseResDto dto) {
+
+
         CourseEntity core = courseRepo.findById(dto.getId())
-                .orElseThrow(()->new RuntimeException("Course not found with ID of "+dto.getId()));
-        if (dto.getCourseName() != null){
-            CourseEntity existCore = courseRepo.findByCourseName(dto.getCourseName());
-            if (existCore != null){
-                throw new RuntimeException(dto.getCourseName() +" already here");
-            }else {
-                core.setCourseName(dto.getCourseName());
-            }
-        }
-        if (dto.getStaffName() != null){
-            UserProfileEntity staff = profileRepo.findByName(dto.getStaffName());
-            if (staff != null){
-                boolean existCore = profileRepo.existsByCourse(staff.getCourse());
-                if (existCore){
-                    throw new RuntimeException("Staff already has Course");
-                }else {
-                    core.setStaff(staff);
+                .orElseThrow(() -> new RuntimeException("Course not found with ID of " + dto.getId()));
+
+        // Update course name if provided and different
+        if (dto.getCourseName() != null && !dto.getCourseName().isBlank()) {
+            String incomingName = dto.getCourseName().trim();
+            if (!incomingName.equals(core.getCourseName())) {
+                CourseEntity existing = courseRepo.findByCourseName(incomingName);
+                if (existing != null) {
+                    throw new RuntimeException(incomingName + " already exists");
                 }
-            }else {
-                throw new RuntimeException(dto.getStaffName() + " Staff not found");
+                core.setCourseName(incomingName);
             }
         }
+
+        // Update staff if provided
+        if (dto.getStaffName() != null && !dto.getStaffName().isBlank()) {
+            String staffName = dto.getStaffName().trim();
+            UserProfileEntity staff = profileRepo.findByName(staffName);
+            if (staff == null) {
+                throw new RuntimeException(staffName + " not found");
+            }
+
+            CourseEntity currentCourse = staff.getCourse();
+            if (currentCourse != null && !core.equals(currentCourse)) {
+                boolean alreadyAssigned = profileRepo.existsByCourse(currentCourse);
+                if (alreadyAssigned) {
+                    throw new RuntimeException("Staff already assigned to another course");
+                }
+            }
+
+            core.setStaff(staff);
+        }
+
         CourseEntity saved = courseRepo.save(core);
 
         CourseResDto res = new CourseResDto();
         res.setId(saved.getId());
         res.setCourseName(saved.getCourseName());
-        res.setStaffName(saved.getStaff().getName());
+        res.setStaffName(saved.getStaff() != null ? saved.getStaff().getName() : null);
+
         return res;
     }
 

@@ -386,22 +386,26 @@ public class StaffServiceImp implements StaffService {
     }
 
     @Override
-    public Page<GetCourseRequestDto> getCourseFilerStud(String name, String email, String courseStatus, int page, int size) {
-        // Get current authenticated user
+    public Page<GetCourseRequestDto> getCourseFilerStud(String name, String courseStatus, int page, int size) {
+        // 1. Get current authenticated user
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UsersEntity user = usersRepo.findByUsername(username);
         if (user == null || user.getProfile() == null) {
             throw new RuntimeException("Staff profile not found");
         }
 
+        // 2. Get course
         CourseEntity course = user.getProfile().getCourse();
         if (course == null) {
             throw new RuntimeException("Course not assigned to staff");
         }
 
-        // Handle course status enum conversion
+        // 3. Handle filters
+        String nameFilter = (name == null || name.isBlank()) ? null : name;
+
+
         CourseRequestStatusEnum statusEnum = null;
-        if (!courseStatus.isBlank()) {
+        if (courseStatus != null && !courseStatus.isBlank()) {
             try {
                 statusEnum = CourseRequestStatusEnum.valueOf(courseStatus.toUpperCase());
             } catch (IllegalArgumentException e) {
@@ -410,9 +414,34 @@ public class StaffServiceImp implements StaffService {
         }
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<StudentEntity> students = studentRepo.findByCourseAndFilters(course.getId(), name, email, statusEnum, pageable);
+        Page<StudentEntity> students = studentRepo.findByCourseAndFilters(course.getId(), nameFilter,  statusEnum, pageable);
 
         return students.map(this::mapToGetCourseRequestDto);
+    }
+
+    @Override
+    public Page<StudentResDto> getFilterSubjectStudents(String name, int page, int size) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        UsersEntity user = usersRepo.findByUsername(username);
+        if (user == null || user.getProfile() == null) {
+            throw new RuntimeException("Staff not found or not logged in.");
+        }
+
+        SubjectEntity subject = user.getProfile().getSubject();
+        if (subject == null) {
+            throw new RuntimeException("No subject assigned to this staff.");
+        }
+
+        if (name != null && name.trim().isEmpty()) {
+            name = null;
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<StudentEntity> studentPage = studentRepo.findBySubjectWithNameFilter(subject, name, pageable);
+
+        return studentPage.map(this::mapToDto);
     }
 
 

@@ -31,7 +31,6 @@ public class StaffDto {
     @NotBlank(message = "Staff phoneNumber is required")
     private String phoneNumber;
 
-    @NotNull(message = "subject subjectId is required")
     private Long subjectId;
 
     private String courseName;
